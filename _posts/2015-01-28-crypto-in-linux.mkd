@@ -1,0 +1,83 @@
+---
+layout: post
+title:  "Clé SSH sous Linux"
+date:   2015-01-28 17:05:31
+categories: linux crypto
+
+---
+
+Les formats fichiers et leur rôles
+----------------------------------
+
+### CSR
+
+|          Details                     ||
+|-------------|-------------------------|
+| Extention : | csr                     |
+| Format    : | PKCS10                  |
+| RFC       : | [RFC 2986][RFC-2986]    |
+
+
+**.csr** (Certificate Signing Request) :
+Fichier au format PEM dont le contenu est encodé en Base64 représentant une
+demande de certificat à transmettre auprès d'une autorité de certification
+(communément abrégé en CA pour Certificate Authority). Celle-ci génère et
+signe numériquement le nouveau certificat. Un fichier CSR contient
+généralement les informations suivantes :
+
+- Nom de domaine complet (Full Qualified Domain Name).
+- Organisation
+- Division demandant le certificat (ou service)
+- Ville / localité
+- Pays / région
+- Pays au code ISO (deux caractères, exemple : FR)
+- E-mail
+- Clé publique
+
+
+**Commandes usuelles**
+
+Sous Linux, on peut aisément générer un fichier CSR :
+
+- Vous n'avez pas de clé privée :  
+  ```
+  openssl req -new -newkey rsa:2048 -nodes -keyout myserver.key -out server.csr
+  ```
+
+- Vous avez une clé privée :  
+  ```
+  openssl req -new -keyout server.key -out server.csr
+  ```
+
+Fichier généré :
+<pre>
+-----BEGIN CERTIFICATE REQUEST-----
+MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAkZSMQ8wDQYDVQQIDAZGcmFuY2UxDjAM
+BgNVBAcMBVBhcmlzMQ0wCwYDVQQKDARBRjgzMRAwDgYDVQQLDAdERVZCTE9HMRUw
+EwYDVQQDDAx3d3cuYWY4My5jb20xHzAdBgkqhkiG9w0BCQEWEGNvbnRhY3RAYWY4
+My5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDoz0vcsexbvnYU
+nq8E22K5/7RJ8DuFnbPtE++xsCONENoa3J4/2BhjWoooGHlbrk+44JsM1EF7WW6k
+Abm2+35bqZIWrqAKo065G9Jikwp/2diAnGB/Ng9YyOV2ocG2hnJdZJ8vdhsou9jX
+MAJfxyWAt82NXEbgF49Ls3FEuFX25HD64YPu2jfcbscXf9xP5hZ5EElxri1iMQ1W
+BF8AcIgIjF5xb9lDk3vuP7X0+q8Su9BYhJfjah3WGyBB4ZCyRyKRFJYYGqHmSAG3
+SmC+3x3MUyd0IWIBFOO+M/8HK01WjlADFQD/ht7LcAhUVzqh+GuaA48rRzH6Dt1m
+MbJ9ikgxAgMBAAGgADANBgkqhkiG9w0BAQsFAAOCAQEAcLPZgPjjJMePlduO3CG/
+YPqAecMXyj4rw4LAiwijj0fogiAqNUONJcJDoydkbSXRMN0vcgsPb8OIvgmUz1ba
+pZwkF9Wn0ISDlGHvx2c74obr+Bt41LIbszVPHXlem5V8F5CdqRhZSxlbwqvbG1EP
+cL5DEuSuGUKqfl1basyYlgK0mqCp3HdBtTCO9xR1IYs70HKdKxnUiNtVzLgfiNYJ
+jpRm9EobF1edWZnmmdz0xdYjQFajOyiAAznMK6Lf8IK0lBQ4y885jbe9dVxaELeG
+idBChXMho0PlGYUw2gbLKrhAaFok2UQo8qzqS2LRx0AVQEnPeYl3/VmqKTsQRor9
+VA==
+-----END CERTIFICATE REQUEST-----
+</pre>
+
+Pour décoder le fichier ci-dessus :  
+```
+openssl req -in server.csr -noout -text
+```
+
+
+Regarde les infos là :
+http://serverfault.com/questions/9708/what-is-a-pem-file-and-how-does-it-differ-from-other-openssl-generated-key-file
+
+[RFC-2986]:       https://tools.ietf.org/html/rfc2986
