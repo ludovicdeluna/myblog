@@ -241,7 +241,19 @@ utilisez la commande suivante (clé au format RSA) :
 openssl rsa -inform DER -outform PEM -in id_rsa.der -out id_rsa.pem
 ```
 
-### PKCS 7
+Les normaes PKCS concernent uniquement les clés RSA. Pour DSA et ECC, se sont d'autres
+formats et d'autres normes. RSA étant l'algorithme le plus répendu, c'est celui-ci
+que je vous propose de gérer.
+
+### PKCS#1
+Utilisé pour stocker clé publique ou clé privée avec ou sans cryptage, c'est la première
+version normalisé pour stocker les clés. Il a été ensuite remplacé par PKCS#8 mais est
+toujours utilisé.
+
+### PKCS#8
+
+
+### PKCS#7
 
 Conteneur en standard ouvert ([RFC-2315][RFC-2315]) ne pouvant pas inclure de clé privé.
 Utilisé pour stocker un certificat serveur avec sa chaîne de certification, ce
@@ -249,7 +261,7 @@ format est reconnu en natif par le framework Java et MS Windows.
 **Extentions** : .p7b .p7c
 
 
-### PKCS 12
+### PKCS#12
 
 Conteneur issu d'un standard privé pouvant inclure une / des clé(s)
 privé(s) et disposant de mécanismes de sécurité supplémentaires par rapport
@@ -302,7 +314,7 @@ ssh-keygen -t rsa -b 2048
 La clé publique est dans le fichier ```id_rsa.pub``` dans un format propre à
 OpenSSH et la clé privé est dans ```id_rsa``` (sans extention) dont le format
 est le même, sauf si vous avez donné une passphrase pour crypter la clé. Dans ce
-cas, la clé privée est stockée au format PEM et cryptée via l'algorithme AES en
+cas, la clé privée est stockée au format PEM au format PKCS#1 cryptée via l'algorithme AES en
 128 bits.
 
 > Attention : Putty (Windows) requiert une clé stockée au format PEM et cryptée
@@ -315,7 +327,7 @@ déduite d'après la clé privée via la commande suivante :
 ssh-keygen -f id_rsa -y > id_rsa.pub
 ```
 
-**RESULTAT**
+**RESULTAT : Clé au format OpenSSH**
 
 ```
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvYwy4ZcnP3j74D8f06WVWHGPxIK8pIs8qDOE6loQR
@@ -325,12 +337,15 @@ xVEFYRfFsT2PhI+NaoGmyDYeR+1tMDL4oPL7uSzzOPwHZih83eYMuRElIZDD3b697IVDxHLGp8uJSJAE
 BvTtzpIB/EQFM1GufPQiUU//8CAP112CUbdLcd3G6ifvmVKXBAN6IOMY/+g9
 ```
 
+Ce format a l'avantage d'être tout de suite intégrable dans le fichier de clés
+publiques autorisées ```authorized_keys``` qui impose d'avoir une clé par ligne.
+SSH dispose d'un autre format répondant à la norme rfc4716. Pour l'utiliser, il
+faut exporter la clé publique en indiquant aucun format.
 
 ### Avec OpenSSL
 
 Utilisez openssl pour contrôler plus facilement la génération de vos clés et
-sotcker vos clés dans des fichiers PEM génériques, c'est à dire sans les
-extentions descriptives que OpenSSH ajoute. Ce format est correctement supporté
+sotcker vos clés dans des fichiers PEM au format PKCS#8. Ce format est correctement supporté
 par tous les logiciels exploitant des clés ainsi que OpenSSH.
 
 Ici, nous générons les mêmes clés (RSA), mais avec l'algorithme de cryptage DES3
@@ -345,7 +360,7 @@ Algorithme associé à la clé : RSA ou DSA
 Format de sortie : PEM ou DEM  
 Cryptage de la clé privée : des3 ou aes-128-cbc  
 
-**RESULTAT**
+**RESULTAT : Fichier PEM au format PKCS#8**
 
 ```
 -----BEGIN ENCRYPTED PRIVATE KEY-----
@@ -388,7 +403,7 @@ Cependent, OpenSSL la supporte toujours très bien :
 openssl genrsa -des3 -out id_rsa 2048
 ```
 
-**RESULTAT**
+**RESULTAT : Fichier PEM au format PKCS#1**
 
 ```
 -----BEGIN RSA PRIVATE KEY-----
@@ -447,7 +462,7 @@ PQIDAQAB
 -----END PUBLIC KEY-----
 ```
 
-### Clé publique au format PEM (PKCS8) ou OpenSSH ?
+### Clé publique au format PEM (PKCS#8) ou OpenSSH ?
 
 Si vous souhaitez échanger avec un administrateur système votre clé publique, il
 faudra favoriser le format OpenSSH car la clé y est stocké en clair sans
@@ -789,3 +804,7 @@ https://help.ubuntu.com/community/SSH/OpenSSH/Keys
 
 A lire et relire :
 https://www.netmeister.org/blog/ssh2pkcs8.html
+
+Voir aussi :
+http://www.cryptosys.net/pki/rsakeyformats.html
+https://polarssl.org/kb/cryptography/asn1-key-structures-in-der-and-pem
