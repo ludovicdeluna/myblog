@@ -18,6 +18,7 @@ body {
     font-size: $base-font-size;
     line-height: $base-line-height;
     font-weight: 300;
+    font-size: 16px;
     color: $text-color;
     background-color: $background-color;
     -webkit-text-size-adjust: 100%;
@@ -80,10 +81,49 @@ li {
  * Headings
  */
 h1, h2, h3, h4, h5, h6 {
-    font-weight: 300;
+    font-weight: 700;
+}
+
+.post-title {
+  font-weight: 300
 }
 
 
+/**
+ * Ludovic
+ */
+h1 {
+  border-bottom: 1px solid #CCC;
+  font-size: 28px;
+}
+
+h2 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 26px;
+}
+
+.post-content table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-bottom: 16px;
+}
+
+.post-content td,
+.post-content th {
+  padding: 6px 13px;
+  border: 1px solid #DDD;
+}
+
+.post-content tr{
+  border: solid 1px #CCC;
+}
 
 /**
  * Links
