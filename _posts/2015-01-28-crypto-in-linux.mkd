@@ -31,15 +31,23 @@ ce qui est à sa base : La cryptographie asymetrique et ses principaux
 algorithmes qui sont :
 
 - **RSA** :  
-  Développé par 3 mathématiciens en 1977 puis breveté en 1983 par le
-  MIT (USA). Cet algorithme est l'un des plus utilisés aujourd'hui. Le nom RSA
-  vient de ses trois créateurs : Ron **R**ivest, Adi **S**hamir and Leonard
-  **A**dleman
+  Développé par 3 mathématiciens en 1977 et breveté en 1983 par le
+  MIT (USA) puis utilisé dès 1990 par les laboratoirs RSA Security INC en
+  Californie pour créer une norme de sécurité autour des clés publique générées
+  par cet algorithme : PKCS (Public Key Cryptographic Standards), dont les
+  formats les plus répendus dans les échanges sur internet sont PKCS#1, PKCS#7,
+  PKCS#8 et PKCS#12. Le nom RSA vient de ses trois créateurs : Ron **R**ivest,
+  Adi **S**hamir and Leonard **A**dleman.
 
 - **DSA** :  
-  Développé par le NIST en 1991 pour disposer d'un algorithme non breveté
-  (et contrer par la même RSA) afin de completer l'arsenal de sécurité proposé
-  par les spécifications DSS (Digital Signature Standard).
+  Développé par le NIST en 1991 à New York en réponse au RSA qui a l'époque
+  était breveté, c'est l'algorithme de cryptage asymetrique utilisé pour les
+  spécifications de sécurité DSS (Digital Signature Standard). Egalement breveté
+  mais non soumis à une redevance, ce format est celui favorisé par les
+  instances gouvernementales américaines. L'ensemble des standards sont
+  regroupés dans les normes de processus FIPS (Federal Information Processing
+  Standards), le format DSA étant décrit dans les spécifications FIPS 186 dès
+  1993.
 
 - **ECC** :  
   Abbréviation de Elliptic Curve Cryptography, cet algorithme est initialement
@@ -196,16 +204,25 @@ certificat. C'est là qu'on va parler de format de fichier et préciser ses usag
 ci dessous (notez qu'il en existe bien plus).
 
 
+### La norme de stockage ASN.1
+
+C'est la base utilisé pour stocké les clés, certificats et chaîne de
+certification. Il décrit principalements deux conteneurs : L'un permet un
+stockage binaire (DER), l'autre permet un stockage textuel (DER). Quelque soit
+le type d'algorithme utilisé (RSA, DSA, ESN) et les normes associées, tous
+utilisent ASN.1 pour y stocker leur contenu. Les deux conteneurs sont expliqués
+ci-dessous.
+
+
 ### DER (Distinguished Encoding Rules)
 
 Conteneur binaire issu de la  spécification [X.690][X.690] définissant l'un des
-formats supporté par la norme d'encodage ANS.1 ; En dehors de l'embarqué, on
-lui préfère le format PEM.
+formats supporté par la norme ANS.1 ; En dehors de l'embarqué, on lui préfère le
+format PEM.
 
-Utilisé pour :
-
-- Stocker une clé : .der
-- Stocker un certificat au format X.509 (standard): .crt, .cer, .cert
+**Extentions :**
+- .der : Clé publique ou privée au format PKCS#8 (type RSA, DES ou ESN)
+- .crt .cer .cert : Certificat au format X.509
 
 Pour convertir une clé privée stockée dans un fichier PEM vers un format DER,
 utilisez la commande suivante (clé au format RSA) :
@@ -217,22 +234,19 @@ openssl rsa -inform PEM -outform DER -in id_rsa.pem -out id_rsa.der
 
 ### PEM (Privacy Enhanced Email)
 
-Conteneur ASCII (texte) utilisant un jeu de caractère réduit ([base64][RFC-3548])
-supporté par tous les systèmes informatiques. Il est issus du protocole de
-sécurisation d'email du même nom ([RFC-1421][RFC-1421], suivit par la
-[RFC-1424][RFC-1424]). Un fichier PEM contient un ou plusieurs éléments pour
-lesquels il est auto-descriptif : Il indique le type de contenu (certificat,
-clé publique / privée), son format (clé RSA, DSA, ECC) et l'algorithme de
-cryptage si utilisé (DES3, AES).
+Conteneur texte définissant l'un des format supporté par la norme ANS.1 ; Ce
+format utilise un jeu de caractère encodé en [base64][RFC-3548], supporté par tous
+les systèmes informatiques.
+
+**Extentions:**
+- .pem .key : Clé publique ou privée au format PKCS#8 (type RSA, DES ou ESN), ou
+  PKCS#1 (type RSA uniquement) qui est de moins en moins utilisé.
+- .crt .cer .cert : Certificat au format X.509
+- .csr : Demande de certificat
+- .crl : Liste de révocation de certificats / clés
+
 > Bien qu'il soit possible de stocker dans un fichier PEM plusieurs éléments, il
 > est recommandé de se limiter à un élément par fichier.
-
-Utilisé pour :
-
-- Stocker une clé publique ou privée (avec ou sans cryptage) : .key .pem
-- Stocker un certificat au format X.509 (standard): .crt, .cer, .cert
-- Stocker une demande de certificat : .csr
-- Stocker une liste de révocation de certificats : .crl
 
 Pour convertir une clé privée stockée dans un fichier DER vers un format PEM,
 utilisez la commande suivante (clé au format RSA) :
