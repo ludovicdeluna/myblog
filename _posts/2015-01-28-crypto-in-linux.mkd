@@ -194,33 +194,24 @@ Dans quels cas nous utilisons les clés publiques / privées ?
 > serveurs et leur empreinte est dans le fichier ```.ssh/known_hosts```
 
 
-Les formats de fichiers
------------------------
-
-C'est bien beau de parler de clé, mais ce n'est qu'une suite de caractères. Pour
-les utiliser efficacement, il est nécessaire de les stocker dans un fichier qui
-va servir de conteneur et éventuellement, encapsuler la ou les clés dans un
-certificat. C'est là qu'on va parler de format de fichier et préciser ses usages
-ci dessous (notez qu'il en existe bien plus).
-
-
-### La norme de stockage ASN.1
+La norme de stockage ASN.1
+--------------------------
 
 C'est la base utilisé pour stocké les clés, certificats et chaîne de
 certification. Il décrit principalements deux conteneurs : L'un permet un
-stockage binaire (DER), l'autre permet un stockage textuel (DER). Quelque soit
+stockage binaire (DER), l'autre permet un stockage textuel (PEM). Quelque soit
 le type d'algorithme utilisé (RSA, DSA, ESN) et les normes associées, tous
-utilisent ASN.1 pour y stocker leur contenu. Les deux conteneurs sont expliqués
-ci-dessous.
+utilisent ASN.1 pour y stocker leur contenu.
 
 
 ### DER (Distinguished Encoding Rules)
 
-Conteneur binaire issu de la  spécification [X.690][X.690] définissant l'un des
-formats supporté par la norme ANS.1 ; En dehors de l'embarqué, on lui préfère le
-format PEM.
+Issu de la spécification [X.690][X.690], définit un format de stockage binaire.
+Ce format est par exemple utilisé sur de l'embarqué ou pour stocker les
+informations de carte bancaire sur les puces.
 
 **Extentions :**
+
 - .der : Clé publique ou privée au format PKCS#8 (type RSA, DES ou ESN)
 - .crt .cer .cert : Certificat au format X.509
 
@@ -234,13 +225,24 @@ openssl rsa -inform PEM -outform DER -in id_rsa.pem -out id_rsa.der
 
 ### PEM (Privacy Enhanced Email)
 
-Conteneur texte définissant l'un des format supporté par la norme ANS.1 ; Ce
-format utilise un jeu de caractère encodé en [base64][RFC-3548], supporté par tous
-les systèmes informatiques.
+Définit un format de stockage texte, qui a l'avantage d'être supporté par toutes
+les plateformes et facilement échangeable par formulaire web, e-mail, services
+d'échange. Le contenu d'un fichier PEM peut être visualisé et modifié avec
+n'importe quel éditeur, cependant le corp du contenu est encodé en
+[base64][RFC-3548] d'une longueure fixe. Un fichier PEM a une structure très
+simple.
+
+```
+-----DESCRIPTIF DU FICHIER-----
+...... Contenu encodé .........
+........ en base 64 ...........
+-----FIN DU CONTENU---------
+```
 
 **Extentions:**
+
 - .pem .key : Clé publique ou privée au format PKCS#8 (type RSA, DES ou ESN), ou
-  PKCS#1 (type RSA uniquement) qui est de moins en moins utilisé.
+              PKCS#1 (type RSA uniquement) qui est de moins en moins utilisé.
 - .crt .cer .cert : Certificat au format X.509
 - .csr : Demande de certificat
 - .crl : Liste de révocation de certificats / clés
@@ -255,25 +257,103 @@ utilisez la commande suivante (clé au format RSA) :
 openssl rsa -inform DER -outform PEM -in id_rsa.der -out id_rsa.pem
 ```
 
-Les normaes PKCS concernent uniquement les clés RSA. Pour DSA et ECC, se sont d'autres
-formats et d'autres normes. RSA étant l'algorithme le plus répendu, c'est celui-ci
-que je vous propose de gérer.
+La norme PKCS
+-------------
+
+La norme PKCS regroupe toutes les règles d'utilisation et d'encodage lié à la
+sécurisation d'échange par l'alogirthme RSA. Cependant, une partie des normes
+PKS sont également utilisées avec d'autres algorithmes, dont le DES.
+
+Les données PKCS peuvent être stockées dans un fichier PEM ou DER.
+
 
 ### PKCS#1
+
 Utilisé pour stocker clé publique ou clé privée avec ou sans cryptage, c'est la première
 version normalisé pour stocker les clés. Il a été ensuite remplacé par PKCS#8 mais est
 toujours utilisé.
+**Extentions** : Aucune par défaut (si généré par OpenSSH), sinon .key
+
+Exemples :
+
+```
+-----BEGIN RSA PUBLIC KEY-----
+..... Contenu encodé .........
+....... en base 64 ...........
+-----END RSA PUBLIC KEY-----
+```
+
+Et pour une clé privée :
+
+```
+-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,D345A404789488745F2BE16F47F72D0A
+..... Contenu encodé .........
+....... en base 64 ...........
+-----END RSA PRIVATE KEY-----
+```
+
+
+> OpenSSH génère par défaut des fichiers au format PKCS#1 avec quelques
+> informations en clair au dessus des données encodées.
+
 
 ### PKCS#8
+
+Ce format est plus évolué que PKCS#1 et représente son successeur. Ce format
+permet de stocker des éléments utilisants d'autres algorithmes que RSA, dont le
+DES. En règle général, on lui préfère ce format, même si certains outils (dont
+OpenSSH) continuent d'utiliser PKCS#1 par défaut.  
+**Extentions** : .pem .der .key .cert .cer crt
+
+Exemples :
+
+```
+-----BEGIN PUBLIC KEY-----
+..... Contenu encodé .........
+....... en base 64 ...........
+-----END PUBLIC KEY-----
+```
+
+et pour une clé privée :
+
+```
+-----BEGIN ENCRYPTED PRIVATE KEY-----
+..... Contenu encodé .........
+....... en base 64 ...........
+-----END ENCRYPTED PRIVATE KEY-----
+```
+
+> Les versions récentes d'OpenSSH peuvent lire et écrire des fichiers PEM/DER au
+> format PKCS#8, ou convertir du PKCS#1 vers PKCS#8 et vice versa.
 
 
 ### PKCS#7
 
-Conteneur en standard ouvert ([RFC-2315][RFC-2315]) ne pouvant pas inclure de clé privé.
-Utilisé pour stocker un certificat serveur avec sa chaîne de certification, ce
-format est reconnu en natif par le framework Java et MS Windows.  
+Conteneur en standard ouvert ([RFC-2315][RFC-2315]) ne pouvant pas inclure de
+clé privé.  Utilisé pour stocker un certificat serveur avec sa chaîne de
+certification, ce format est reconnu en natif par le framework Java et MS
+Windows.
 **Extentions** : .p7b .p7c
 
+Exemple de clé publique :
+
+```
+-----BEGIN PKCS7-----
+..... Contenu encodé .........
+....... en base 64 ...........
+-----END PKCS7-----
+```
+
+Exemple avec un certificat :
+
+```
+-----BEGIN CERTIFICATE-----
+..... Contenu encodé .........
+....... en base 64 ...........
+-----END CERTIFICATE-----
+```
 
 ### PKCS#12
 
@@ -296,16 +376,41 @@ Pour convertir un contenu PKCS#12 en format PEM :
   openssl pkcs12 -clcerts -nokeys -in cert.p12 -out mycert.crt
   ```
 
-### Les autres formats
 
-**Open-SSH** : Ce format de stockage est dès plus rudimentaires. Il est
-utilisé par Open SSH et ne permet pas de crypter son contenu. Les outils Open
-SSH utilisent automatiquement le format PEM dès qu'il faut crypter la clé.
-L'alogithme de cryptage de la clé est AES, mais il est possible d'en utiliser
-d'autres via les outils OpenSSL (dont l'exellent DES3).
+SSH et SSH2 (RFC4716)
+---------------------
 
-Noter qu'il existe bien d'autres formats, dont ceux utilisés pour GnuPG / GPG et
-qui leur sont spécifiques, ainsi que toutes les variantes des formats pré-cités.
+Le protocole SSH dispose lui aussi de sa norme de stockage, SSH et SSH2. Au
+départ, seul RSA était supporté et c'était donc le format de stockage SSH.
+Ensuite, DSA a été pris en charge et le format a évolué vers SSH2.
+
+Exemple avec un fichier SSH2 :
+
+```
+-----BEGIN SSH2 PUBLIC KEY-----
+Comment: "Commentaire libre ici"
+..... Contenu encodé .........
+....... en base 64 ...........
+-----END SSH2 PUBLIC KEY-----
+```
+
+**Note sur OpenSSH :**
+Il utilise par défaut la norme RFC4716, qui stocke les clés publique / privée de
+façon non cryptée et sur une seule ligne dans un fichier qui lui est propre (il
+ne s'agit pas de PEM ou DER).
+
+Exemple :
+
+```
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDROeOtYw6Im1QhqWo8AxKpBkJQ+2TKX1QOy6c3bMB
+aar5AXdQ+b8sKM9rfAT5KoOfh8raIMo6h3aHD+tOsPaqApy3Hpvvn2Y0yKenONdvRdv7qua4tCEY9ji
+5C9Kko5PDsJ1W49R5CTvjpPFZI/ELHx7X+TymbSxcOwnuNjnj3UJW7+e1NPirBStFu2OAruOxMik8VV
+bJFiLcqnrHcW9yvxb8IAoLCcDKjHFw9zEa1ZKUurz2ik04MZbxsngo7H8KufUjzDmwbSMz/fM3UnLte
+ata/BnvHYUGpnB0WL/UXbvB4o9jvAaePpGtzHp52
+```
+
+Dès que OpenSSH stocke un clé privée cryptée, il utilise un fichier PEM au
+format PKCS#1 (pour les clé RSA).
 
 
 
