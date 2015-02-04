@@ -61,9 +61,10 @@ algorithmes qui sont :
 
 Les algorithmes de cryptographie les plus courants sont dits *symétriques*,
 c'est-à-dire qu'ils reposent sur un élément secret partagé par l'émetteur et
-le destinataire du message (le mot de passe ou la passphrase). Le principal
-inconvénient de ce système et que si l'élément secret est divulgué, la sécurité
-n'est plus assurée.
+le destinataire du message (le mot de passe ou la passphrase). Les plus courants
+dans le domaine des clés sont les algorithmes de cryptage DES / Triple DES
+(nommé DES3) et son successeur AES. Le principal inconvénient de ce système et
+que si l'élément secret est divulgué, la sécurité n'est plus assurée.
 
 A l'inverse, la cryptographie *asymétrique* implique d'utiliser deux éléments
 adressés à chacune des deux parties : Ce sont les clés. Chaque algorithme
@@ -708,7 +709,7 @@ Sinon, votre client SSH va tester toutes vos clés.
 > Si votre serveur utilise le port par défaut (22), l'option Port est inutile.
 
 
-**SSH-Agent**
+**SSH-Agent**  
 Une clé privée est normalement cryptée, et la passphrase vous est demandée à
 chaque fois que le client SSH y accède. Pour ne pas répeter la passphrase, vous
 pouvez utiliser SSH-Agent (Linux). Voici comment automatiser son chargement :
@@ -718,15 +719,18 @@ utilisez l'environnement graphique X (certaines distributions intègrent un
 client graphique et chargent automatiquement SSH-Agent).
 
 2. Ajouter les lignes suivantes :
+
+```
 export SSH_AUTH_SOCK=~/.ssh/ssh-agent.local.sock
 ps -aux|grep "[s]sh-agent" >/dev/null || ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
 ssh-add -l
+  ```
 
 > Ici, on impose que le client SSH-Agent écoute sur un socket unix qui sera
 > toujours le même (chemun par défaut). Ensuite, on utilise ssh-add pour
 > afficher les clés déjà en mémoire.
 
-3. Pour ajouter une clé, tapez la commande ```ssh-add nom_de_ma_cle```
+Pour ajouter une clé, tapez la commande ```ssh-add nom_de_ma_cle```
 
 
 ### Coté serveur
