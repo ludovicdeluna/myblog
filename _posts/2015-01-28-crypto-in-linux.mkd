@@ -708,6 +708,27 @@ Sinon, votre client SSH va tester toutes vos clés.
 > Si votre serveur utilise le port par défaut (22), l'option Port est inutile.
 
 
+**SSH-Agent**
+Une clé privée est normalement cryptée, et la passphrase vous est demandée à
+chaque fois que le client SSH y accède. Pour ne pas répeter la passphrase, vous
+pouvez utiliser SSH-Agent (Linux). Voici comment automatiser son chargement :
+
+1. Ouvrez le fichier .profile (si accès en console) ou .xsession si vous
+utilisez l'environnement graphique X (certaines distributions intègrent un
+client graphique et chargent automatiquement SSH-Agent).
+
+2. Ajouter les lignes suivantes :
+export SSH_AUTH_SOCK=~/.ssh/ssh-agent.local.sock
+ps -aux|grep "[s]sh-agent" >/dev/null || ssh-agent -a "$SSH_AUTH_SOCK" >/dev/null
+ssh-add -l
+
+> Ici, on impose que le client SSH-Agent écoute sur un socket unix qui sera
+> toujours le même (chemun par défaut). Ensuite, on utilise ssh-add pour
+> afficher les clés déjà en mémoire.
+
+3. Pour ajouter une clé, tapez la commande ```ssh-add nom_de_ma_cle```
+
+
 ### Coté serveur
 
 On déclare la clé publique. Pour chaque dossier utilisateur pour lequel la clé
