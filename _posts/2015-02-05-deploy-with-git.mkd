@@ -1,0 +1,299 @@
+---
+layout: post
+title:  "Deployer avec Git facilement"
+date:   2015-02-05 10:00:28
+categories: git github
+
+---
+
+Intro
+-----
+
+Deployer votre depôt github (ou bitbucket) sur votre serveur facilement et de
+façon sécurisé en suivant les quelques étapes ci-dessous. Pas de shell-script
+compliqué, juste les commandes que vous connaissez et un peu de paramètrage Git.
+
+A noter que si votre depôt est publique, vous pouvez éviter la partie concernant
+les clés SSH en donnant l'URL HTTP de votre depôt qui est accessible librement
+(et non l'URL SSH). C'est un peu plus lent, mais c'est plus sécurisé aussi dans
+le cas d'un depôt publique.
+
+
+Context
+-------
+
+Vous disposez d'un site en développement sur votre machine. Vous avez mis en
+place une chaîne de compilation (avec Bower ou autre) et disposez donc d'un
+dossier source avec tous vos fichiers de paramétrage (dépendance, configuration
+de tests, etc...).
+
+
+A moins d'utiliser un framework pour languages dynamique coté serveur (Symfony,
+CakePHP, Rails, Sinatra, Voltrb, Django, Flask, voir nodeJS...), vous aurez probablement
+un dossier cible comportant la version finalisée. C'est à dire celle ou vos
+scripts JS seront compilés / minifiés, vos fichier SCSS traités, les sprites
+écrits, les éléments statics générés, etc...
+
+Si vous n'avez pas de dossier cible, vous pourrez ignorer l'étape concernant les
+sous-modules GIT. En revanche, veillez à disposer des deux branches (master et
+prod).
+
+Comment se présente vos dossiers (coté serveur) :  
+
+- Votre dossier web est dans ```/data/www/mon_site_web```
+- Votre dossier git (utilisé pour lancer les commandes) pourrait être dans
+  ```/home/exploit/git/mon_site_web```
+
+Du coté de votre poste de dev, vous choisissez l'organisation qui vous convient
+: Un dossier src et public par exemple, ou un dossier projet avec vos sources et
+un sous-dossier cible (public ou autre)... Brefs, ce n'est pas génant.
+
+
+Objectifs
+---------
+
+L'idée est d'automatiser la mise à jour du dossier web via une commande git
+(```pull```) sans donner accès au sous-dossier ```.git``` depuis le site web (et
+sans passer par un ```.htaccess```, même si c'est une solution convenable).
+Pour les besoins de l'exemple, je considère les dossiers déjà créés avec les
+bons droits.
+
+GitHub et BitBucket disposent de hook qui vont nous servir à placer un jeton de
+traitement qui sera intercepté par un script d'exploitation lancé de façon
+régulière sur votre serveur.
+
+Si le jeton est présent, la chaine de mise à jour se déclanche. Si on ne veut
+pas de hook, on peut laisser un jeton factice et juste parametrer un
+déclanchement toutes les heures ou toutes les 10 minutes... A vous de voir.
+
+Définissez les accès
+--------------------
+
+### Générez vos clés SSH
+
+Utile uniquement si vous n'avez pas déjà un jeu de clé publique/privée. Ici, on
+peut se permettre d'avoir une clé privée sans passphrase (non cryptée).
+
+> Placer les commandes SSH ici et un lien vers l'article correspondant.
+
+Si vous avez déjà une clé privée et souhaitez l'extraire de façon non cryptée,
+lancez la commande suivante
+
+> Faut trouver la commande, mais ça existe.
+
+Si vous souhaitez utiliser une clé privée cryptée, la meilleur méthode et la
+plus sécurisée et de lancer un ssh-agent et d'y ajouter la clé... Manuellement.
+Si vous le faite de façon automatisée sur le serveur qui contient la clé privée,
+les avantages de lé clé cryptée sont perdus.
+
+
+### Configurez le client SSH
+En règle générale, on utilise les accès SSH. Il faut donc parametrer le client
+SSH pour associer sa clé à son depôt GitHub. Attention à bien faire la
+configuration pour le compte qui va lancer la commande ```git pull``` (vérifiez
+bien votre script).
+
+> Idem, faut placer les actions here !
+
+
+### Déclarez la clé publique sur GitHub / BitBucket
+
+> Idem, placer des screens ici
+
+
+Parametrez votre serveur
+------------------------
+
+### Initialisez votre depôt git
+
+Depuis le dossier ```git```, créer un depôt git vide et initiez-le :
+
+```
+git init
+git config core.worktree /data/www/mon_site_web
+git remote add origin git@github.com:MON_NOM/MON_PROJET.git
+git pull
+```
+
+> A chaque commande ```git pull``` depuis le dossier
+> ```/home/exploit/git/mon_site_web```, c'est le dossier web qui sera peuplé par
+> les fichiers de votre depôt git.
+
+
+### Un script tout simple pour automatiser les mises à jour
+
+Le script va faire les actions suivantes :
+
+1. Se positionner dans le dossier git
+2. Vérifier un jeton (*on fera le script correspondant après*)
+3. Si jeton il y a, lancer un pull (possiblement sous un autre compte)
+4. Si besoin, on réaproprie les fichiers à l'utilisateur lié au service web
+5. Effacer le jeton (*on fera ça plus tard aussi*)
+6. On s'envoie un e-mail
+
+Vous pourriez avoir besoin de lancer des actions en plus, tels que redémarrer un
+service web ou vider un cache. Je vous conseil de placer les scripts
+correspondants à l'exterieur pour les rendre commun à toutes vos procédures
+d'exploitation.
+
+> Pourquoi lancer un pull et pas un fetch qui conditionne les actions de mise à
+> jour ? Le pull fait deux choses : Un fetch sur ```origin``` et un merge. On
+> peut donc éviter un test inutil dans le script via cette simple commande. Et
+> si on veut éviter tout risque de discordance entre votre serveur et le depôt
+> GIT, on peut forcer l'écrasement des fichiers serveur via un ```pull -f```. Là
+> encore, c'est à vous de voir... Personnellement, j'évite.
+
+
+**Allez, maintenant le script !**
+
+```bash
+#!/usr/bin/env bash
+clear
+
+# Parametrages (Ne pas ajouter d'espaces)
+export DEPL_SITE_GIT="/home/ubuntu/tests"
+export DEPL_SITE_WEB="/home/ubuntu/tests/www"
+export DEPL_SUBJECT="mon site web"
+export DEPL_JETON=""
+export DEPL_CHOWN=""
+export DEPL_EMAIL="ludovic@moi.com"
+export DEPL_FROM=""
+
+# Variables d'amorce
+export DEPL_GIT_REPOSITORY=""
+export DEPL_SENDMAIL=()
+export DEPL_SENDMAIL_PASS=1
+export DEPL_PASS=1
+export DEPL_MSG=""
+export DEPL_ERRORS=()
+export DEPL_FLAG="[OK]"
+[ -z "$DEPL_FROM" ] && DEPL_FROM=$DEPL_EMAIL
+
+# Affiche les parametres
+echo "Parametres de deploiement :"
+printf "Dossier git : %s\n" "$DEPL_SITE_GIT"
+printf "Site web : %s\n" "$DEPL_SITE_WEB"
+[ ! -z "$DEPL_CHOWN" ] && printf "Propritaire : %s\n" "$DEPL_CHOWN"
+[ ! -z "$DEPL_JETON" ] && printf "Jeton : %s\n" "$DEPL_JETON" || echo "Jeton 0"
+[ ! -z "$DEPL_EMAIL" ] && printf "Envoie d'email à : %s\n" "$DEPL_EMAIL"
+
+
+# Vérifie qu'on peut envoyer un e-mail
+if [ ! -z "$DEPL_EMAIL" ] && ! hash sendmail 2>/dev/null
+then
+  printf "Attention : Sendmail n'est pas installé. Aucun envoie d'e-mail\n"
+  DEPL_SENDMAIL_PASS=0
+fi
+
+# Vérifie qu'on a les deux dossiers
+for check_folder in "$DEPL_SITE_GIT" "$DEPL_SITE_WEB"
+do
+  if [ ! -d "$check_folder" ]
+  then
+    DEPL_ERRORS=("${DEPL_ERRORS[@]}" "Erreur d'acces au dossier $check_folder")
+  fi
+done
+
+# Affiche les infos git
+if [ ${#DEPL_ERRORS[@]} == 0 ]
+then
+  cd "$DEPL_SITE_GIT"
+  DEPL_GIT_REPOSITORY="$(git config --get remote.origin.url)"
+  if [ $? == 0 ]
+  then
+    printf "Depôt git : %s\n" "$DEPL_GIT_REPOSITORY"
+  else
+    # Vérifie qu'on a un dépôt GIT paramétré (implicite)
+    DEPL_ERRORS=("${DEPL_ERRORS[@]}" "Pas de depot GIT dans $DEPL_SITE_GIT.")
+  fi
+fi
+
+echo ""
+
+# Affiche les erreurs si elles existes
+if [ ! ${#DEPL_ERRORS[@]} == 0 ]
+then
+  printf "%s\n" "${DEPL_ERRORS[@]}"
+  DEPL_PASS=0
+fi
+
+
+# Si tout est bon, on le dit et on poursuit
+if [ $DEPL_PASS == 1 ]
+then
+  echo "Configuration ok."
+  if [ ! -z "$DEPL_JETON" ] && [ ! -f "$DEPL_JETON" ]
+  then
+    DEPL_PASS=0
+    echo "Aucun jeton. Fin de traitement."
+    exit 0
+  fi
+
+else
+  DEPL_MSG="Configuration en echec"
+  echo "$DEPL_MSG"
+fi
+
+# Synchronisation (un email est envoyé selon le résultat)
+if [ $DEPL_PASS == 1 ]
+then
+  echo "Synchronisation en cours..."
+  if git pull
+  then
+    DEPL_MSG="Synchronisation terminée."
+
+    if [ ! -z "$DEPL_CHOWN" ]
+    then
+      chown -R "$DEPL_CHOWN" "$DEPL_SITE_WEB"
+      if [ $? != 0 ]
+      then
+        DEPL_MSG="Erreur : Changement de propriétaire impossible : $DEPL_CHOWN"
+        DEPL_PASS=0
+      fi
+    fi
+
+  else
+    DEPL_MSG='Erreur : Echec de la commande git pull.'
+    DEPL_PASS=0
+  fi
+
+  [ $DEPL_PASS == 0 ] && DEPL_FLAG="[ERROR]"
+  [ ! -z "$DEPL_MSG" ] && echo "$DEPL_MSG"
+fi
+
+# E-Mail
+if [ ! -z "$DEPL_EMAIL" ]
+then
+  printf "Envoie de l'email en cours...\n"
+  DEPL_SUBJECT="$DEPL_SUBJECT $DEPL_FLAG"
+  DEPL_SENDMAIL=("${DEPL_SENDMAIL[@]}" "From: $DEPL_FROM" "Subject: $DEPL_SUBJECT")
+  DEPL_SENDMAIL=("${DEPL_SENDMAIL[@]}" "To: $DEPL_EMAIL" "" "$DEPL_MSG" "." "")
+
+  printf "\n ---DEBUT EMAIL---\n"
+  printf "%s\n" "${DEPL_SENDMAIL[@]}"
+  printf " ---FIN EMAIL---\n\n"
+
+  if [ $DEPL_SENDMAIL_PASS == 1 ]
+  then
+    sendmail $DEPL_EMAIL < printf "%s\n" "${DEPL_SENDMAIL[@]}"
+  fi
+
+  if [ $? != 0 ] || [ "$DEPL_SENDMAIL_PASS" == 0 ]
+  then
+    printf "Attention : E-mail non envoyé\n"
+  fi
+fi
+
+# Fin du programme et code de sortie
+if [ $DEPL_PASS == 1 ]
+then
+  echo "Fin du traitement."
+  exit 0
+
+else
+  echo "Echec de la synchronisation."
+  exit 1
+fi
+
+```
+
