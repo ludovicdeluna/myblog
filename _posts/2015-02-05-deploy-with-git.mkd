@@ -42,7 +42,7 @@ Comment se présente vos dossiers (coté serveur) :
 
 - Votre dossier web est dans ```/data/www/mon_site_web```
 - Votre dossier git (utilisé pour lancer les commandes) pourrait être dans
-  ```/home/exploit/git/mon_site_web```
+```/home/exploit/git/mon_site_web```
 
 Du coté de votre poste de dev, vous choisissez l'organisation qui vous convient
 : Un dossier src et public par exemple, ou un dossier projet avec vos sources et
@@ -297,3 +297,35 @@ fi
 
 ```
 
+Ce qui nous sort :
+
+```
+Parametres de deploiement :
+Dossier git : /home/ubuntu/tests
+Site web : /home/ubuntu/tests/www
+Jeton 0
+Envoie d'email à : ludovic@moi.com
+Attention : Sendmail n'est pas installé. Aucun envoie d'e-mail
+Depôt git : git@github.com:ludovicdeluna/myblog.git
+
+Configuration ok.
+Synchronisation en cours...
+Already up-to-date.
+Synchronisation terminée.
+Envoie de l'email en cours...
+
+ ---DEBUT EMAIL---
+From: ludovic@moi.com
+Subject: mon site web [OK]
+To: ludovic@moi.com
+
+Synchronisation terminée.
+.
+
+ ---FIN EMAIL---
+
+Attention : E-mail non envoyé
+Fin du traitement.
+```
+
+Cool !
