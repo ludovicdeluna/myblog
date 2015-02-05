@@ -41,10 +41,11 @@ prod).
 Comment se présente vos dossiers (coté serveur) :  
 
 - Votre dossier web est dans ```/data/www/mon_site_web```
-- Votre dossier git (utilisé pour lancer les commandes) pourrait être dans
-```/home/exploit/git/mon_site_web```
+- Votre dossier git (utilisé pour lancer les commandes) pourrait être
+  dans ```/home/exploit/git/mon_site_web```.
 
-Du coté de votre poste de dev, vous choisissez l'organisation qui vous convient
+
+Du coté de votre poste de dev, vous choisissez l'organisation qui vous convient 
 : Un dossier src et public par exemple, ou un dossier projet avec vos sources et
 un sous-dossier cible (public ou autre)... Brefs, ce n'est pas génant.
 
