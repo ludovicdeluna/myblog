@@ -148,6 +148,7 @@ d'exploitation.
 
 **Allez, maintenant le script !**
 
+```bash
 #!/usr/bin/env bash
 clear
 
