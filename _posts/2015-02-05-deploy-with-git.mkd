@@ -148,12 +148,10 @@ d'exploitation.
 
 **Allez, maintenant le script !**
 
-```bash
-
 #!/usr/bin/env bash
 clear
 
-# Parametrages (Ne pas ajouter d'espaces)
+# Paramétrages (Ne pas ajouter d'espaces)
 # Les 3 premiers sont des chemuns absolus (path entier)
 export DEPL_SITE_GIT="/home/ubuntu/tests"
 export DEPL_SITE_WEB="/home/ubuntu/tests/www"
@@ -173,11 +171,11 @@ export DEPL_ERRORS=()
 export DEPL_FLAG="[OK]"
 [ -z "$DEPL_FROM" ] && DEPL_FROM=$DEPL_EMAIL
 
-# Affiche les parametres
-echo "Parametres de deploiement :"
+# Affiche les paramètres
+echo "Paramètres de deploiement :"
 printf "Dossier git : %s\n" "$DEPL_SITE_GIT"
 printf "Site web : %s\n" "$DEPL_SITE_WEB"
-[ ! -z "$DEPL_CHOWN" ] && printf "Propritaire : %s\n" "$DEPL_CHOWN"
+[ ! -z "$DEPL_CHOWN" ] && printf "Propriétaire : %s\n" "$DEPL_CHOWN"
 [ ! -z "$DEPL_JETON" ] && printf "Jeton : %s\n" "$DEPL_JETON" || echo "Jeton 0"
 [ ! -z "$DEPL_EMAIL" ] && printf "Envoie d'email à : %s\n" "$DEPL_EMAIL"
 
@@ -185,7 +183,7 @@ printf "Site web : %s\n" "$DEPL_SITE_WEB"
 # Vérifie qu'on peut envoyer un e-mail
 if [ ! -z "$DEPL_EMAIL" ] && ! hash sendmail 2>/dev/null
 then
-  printf "Attention : Sendmail n'est pas installé. Aucun envoie d'e-mail\n"
+  printf "Attention : Sendmail n'est pas installé. Aucun envoi d'e-mail\n"
   DEPL_SENDMAIL_PASS=0
 fi
 
@@ -194,7 +192,7 @@ for check_folder in "$DEPL_SITE_GIT" "$DEPL_SITE_WEB"
 do
   if [ ! -d "$check_folder" ]
   then
-    DEPL_ERRORS=("${DEPL_ERRORS[@]}" "Erreur d'acces au dossier $check_folder")
+    DEPL_ERRORS=("${DEPL_ERRORS[@]}" "Erreur d'accès au dossier $check_folder")
   fi
 done
 
@@ -208,13 +206,13 @@ then
     printf "Depôt git : %s\n" "$DEPL_GIT_REPOSITORY"
   else
     # Vérifie qu'on a un dépôt GIT paramétré (implicite)
-    DEPL_ERRORS=("${DEPL_ERRORS[@]}" "Pas de depot GIT dans $DEPL_SITE_GIT.")
+    DEPL_ERRORS=("${DEPL_ERRORS[@]}" "Pas de dépôt GIT dans $DEPL_SITE_GIT.")
   fi
 fi
 
 echo ""
 
-# Affiche les erreurs si elles existes
+# Affiche les erreurs si elles existent
 if [ ! ${#DEPL_ERRORS[@]} == 0 ]
 then
   printf "%s\n" "${DEPL_ERRORS[@]}"
@@ -234,11 +232,11 @@ then
   fi
 
 else
-  DEPL_MSG="Configuration en echec"
+  DEPL_MSG="Configuration en échec"
   echo "$DEPL_MSG"
 fi
 
-# Synchronisation (un email est envoyé selon le résultat)
+# Synchronisation (un e-mail est envoyé selon le résultat)
 if [ $DEPL_PASS == 1 ]
 then
   echo "Synchronisation en cours..."
@@ -261,6 +259,7 @@ then
     DEPL_PASS=0
   fi
 
+  # En cas de pépin, change le statut [OK] -> [ERROR] et affiche le résultat
   [ $DEPL_PASS == 0 ] && DEPL_FLAG="[ERROR]"
   [ ! -z "$DEPL_MSG" ] && echo "$DEPL_MSG"
 fi
@@ -285,7 +284,7 @@ then
   printf " ---FIN EMAIL---\n\n"
 
   if [ $DEPL_SENDMAIL_PASS == 1 ]
-  then
+  then # You know what ? J'ai pas testé ça !
     sendmail $DEPL_EMAIL < printf "%s\n" "${DEPL_SENDMAIL[@]}"
   fi
 
