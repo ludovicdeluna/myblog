@@ -287,7 +287,7 @@ then
 
   if [ $DEPL_SENDMAIL_PASS == 1 ]
   then # You know what ? J'ai pas testé ça !
-    sendmail $DEPL_EMAIL < printf "%s\n" "${DEPL_SENDMAIL[@]}"
+    printf "%s\n" "${DEPL_SENDMAIL[@]}" | sendmail $DEPL_EMAIL
   fi
 
   if [ $? != 0 ] || [ "$DEPL_SENDMAIL_PASS" == 0 ]
@@ -312,19 +312,19 @@ fi
 Ce qui nous sort :
 
 ```
-Parametres de deploiement :
+Paramètres de déploiement :
 Dossier git : /home/ubuntu/tests
 Site web : /home/ubuntu/tests/www
 Jeton 0
-Envoie d'email à : ludovic@moi.com
-Attention : Sendmail n'est pas installé. Aucun envoie d'e-mail
-Depôt git : git@github.com:ludovicdeluna/myblog.git
+Envoie d'e-mail à : ludovic@moi.com
+Attention : Sendmail n'est pas installé. Aucun envoi d'e-mail
+Dépôt git : git@github.com:ludovicdeluna/myblog.git
 
 Configuration ok.
 Synchronisation en cours...
 Already up-to-date.
 Synchronisation terminée.
-Envoie de l'email en cours...
+Envoi de l'e-mail en cours...
 
  ---DEBUT EMAIL---
 From: ludovic@moi.com
@@ -341,3 +341,4 @@ Fin du traitement.
 ```
 
 Cool !
+
