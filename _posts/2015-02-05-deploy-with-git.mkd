@@ -6,111 +6,71 @@ categories: git github
 
 ---
 
-Intro
------
+Introduction
+------------
 
-Deployer votre depôt github (ou bitbucket) sur votre serveur facilement et de
-façon sécurisé en suivant les quelques étapes ci-dessous. Pas de shell-script
-compliqué, juste les commandes que vous connaissez et un peu de paramètrage Git.
+Les projets sont généralements hébergés sur un dépôt GIT. Qu'il s'agisse d'un
+dépôt sur serveur privé ou via un service (GitHub, Bitbucket), il est possible
+d'associer un déploiement automatique vers vos serveurs.
 
-A noter que si votre depôt est publique, vous pouvez éviter la partie concernant
-les clés SSH en donnant l'URL HTTP de votre depôt qui est accessible librement
-(et non l'URL SSH). C'est un peu plus lent, mais c'est plus sécurisé aussi dans
-le cas d'un depôt publique.
+Efficace pour des environnements de développement ou "staging" / "UAT", on
+préfèrera une méthode plus conventionnelle pour la production.
+
+Il ne s'agit pas ici de décrire une méthode visant à concurrencer des outils
+spécialisés (dont l'excellent capistrano) mais d'apporter une solution simple
+basée sur :
+
+- Les hooks (Git, Github, Bitbucket).
+- Un client Git.
+- Un shell script Unix lancé depuis CRON.
+- Un script (PHP, Ruby, Python ou autre) pour générer un jeton (appelé par le
+  Hook).
 
 
 Context
 -------
 
-Vous disposez d'un site en développement sur votre machine. Vous avez mis en
-place une chaîne de compilation (avec Bower ou autre) et disposez donc d'un
-dossier source avec tous vos fichiers de paramétrage (dépendance, configuration
-de tests, etc...).
+On souhaite récupèrer de façon automatique le contenu de notre depôt Git sur
+notre serveur. Pour des raisons de sécurité ou de pratique, nous ne souhaitons
+pas que le référentiel (dossier .git) soit dans le dossier du site.
+
+Sur le serveur, nous avons :
+
+- Le dossier utilisé par les scripts d'exploitation, qui contiendra également
+  notre dépôt. Disons : ```/home/exploit/git/mon_site_web```
+- Le dossier web : ```/data/www/mon_site_web```
 
 
-A moins d'utiliser un framework pour languages dynamique coté serveur (Symfony,
-CakePHP, Rails, Sinatra, Voltrb, Django, Flask, voir nodeJS...), vous aurez
-probablement un dossier cible comportant la version finalisée. C'est à dire
-celle ou vos scripts JS seront compilés / minifiés, vos fichier SCSS traités,
-les sprites écrits, les éléments statics générés, etc...
+### Principes
 
-Si vous n'avez pas de dossier cible, vous pourrez ignorer l'étape concernant les
-sous-modules GIT. En revanche, veillez à disposer des deux branches (master et
-prod).
+Toute mise à jour de notre dépôt sur une branche cible enclenche un "Hook" qui
+va appeler une page web de notre serveur. La page web en elle-même va juste
+générer un jeton (simple fichier vide).
 
-Comment se présente vos dossiers (coté serveur) :  
-
-- Votre dossier web est dans ```/data/www/mon_site_web```
-- Votre dossier git (utilisé pour lancer les commandes) pourrait être
-  dans ```/home/exploit/git/mon_site_web```.
+Un script vérifie régulièrement la présence du jeton et lance la commande ```git
+pull``` lorsque ce dernier est présent. Un e-mail est ensuite envoyé à chaque
+déploiement.
 
 
-Du coté de votre poste de dev, vous choisissez l'organisation qui vous convient 
-: Un dossier src et public par exemple, ou un dossier projet avec vos sources et
-un sous-dossier cible (public ou autre)... Brefs, ce n'est pas génant.
+Pour la mise en place, il faut procéder ainsi :
+
+1. Créer un dépôt git sur le serveur et récupérer la branche du projet.
+2. Configurer le script web qui va générer un jeton.
+3. Configurer le shell script avec les bons chemuns et paramétrer CRON.
+4. Disposer d'une clé privée / pubique pour l'accès au dépôt GIT.
+5. Paramétrer le Hook du service Git contenant notre projet.
 
 
-Objectifs
----------
+Créer un dépôt git
+------------------
 
-L'idée est d'automatiser la mise à jour du dossier web via une commande git
-(```pull```) sans donner accès au sous-dossier ```.git``` depuis le site web (et
-sans passer par un ```.htaccess```, même si c'est une solution convenable).
-Pour les besoins de l'exemple, je considère les dossiers déjà créés avec les
-bons droits.
-
-GitHub et BitBucket disposent de hook qui vont nous servir à placer un jeton de
-traitement qui sera intercepté par un script d'exploitation lancé de façon
-régulière sur votre serveur.
-
-Si le jeton est présent, la chaine de mise à jour se déclanche. Si on ne veut
-pas de hook, on peut laisser un jeton factice et juste parametrer un
-déclanchement toutes les heures ou toutes les 10 minutes... A vous de voir.
-
-Définissez les accès
---------------------
-
-### Générez vos clés SSH
-
-Utile uniquement si vous n'avez pas déjà un jeu de clé publique/privée. Ici, on
-peut se permettre d'avoir une clé privée sans passphrase (non cryptée).
-
-> Placer les commandes SSH ici et un lien vers l'article correspondant.
-
-Si vous avez déjà une clé privée et souhaitez l'extraire de façon non cryptée,
-lancez la commande suivante
-
-> Faut trouver la commande, mais ça existe.
-
-Si vous souhaitez utiliser une clé privée cryptée, la meilleur méthode et la
-plus sécurisée et de lancer un ssh-agent et d'y ajouter la clé... Manuellement.
-Si vous le faite de façon automatisée sur le serveur qui contient la clé privée,
-les avantages de lé clé cryptée sont perdus.
-
-
-### Configurez le client SSH
-
-En règle générale, on utilise les accès SSH. Il faut donc parametrer le client
-SSH pour associer sa clé à son depôt GitHub. Attention à bien faire la
-configuration pour le compte qui va lancer la commande ```git pull``` (vérifiez
-bien votre script).
-
-> Idem, faut placer les actions here !
-
-
-### Déclarez la clé publique sur GitHub / BitBucket
-
-> Idem, placer des screens ici
-
-
-Parametrez votre serveur
-------------------------
-
-### Initialisez votre depôt git
-
-Depuis le dossier ```git```, créer un depôt git vide et initiez-le :
+Inutile ici de faire un simple ```git clone``` ! Il faut quelques étapes en
+plus, mais rien de bien compliqué, rassurez-vous :
 
 ```
+mkdir /home/exploit/git/mon_site_web
+cd /home/exploit/git/mon_site_web
+
 git init
 git config core.worktree /data/www/mon_site_web
 git remote add origin git@github.com:MON_NOM/MON_PROJET.git
@@ -122,31 +82,35 @@ git pull
 > les fichiers de votre depôt git.
 
 
-### Un script tout simple pour automatiser les mises à jour
+Configurer le shell script
+--------------------------
 
-Le script va faire les actions suivantes :
+Le script doit décrire les éléments suivants :
 
-1. Se positionner dans le dossier git
-2. Vérifier un jeton (*on fera le script correspondant après*)
-3. Si jeton il y a, lancer un pull (possiblement sous un autre compte)
-4. Si besoin, on réaproprie les fichiers à l'utilisateur lié au service web
-5. Effacer le jeton (*on fera ça plus tard aussi*)
-6. On s'envoie un e-mail
+- DEPL_SITE_GIT : Le dossier contenant le dépôt GIT. Obligatoire, c'est là que
+  sera lancé la commande ```git pull```
 
-Vous pourriez avoir besoin de lancer des actions en plus, tels que redémarrer un
-service web ou vider un cache. Je vous conseil de placer les scripts
-correspondants à l'exterieur pour les rendre commun à toutes vos procédures
-d'exploitation.
+- DEPL_SITE_WEB : Le dossier du site web. Obligatoire, c'est là que le site sera
+  déployé
 
-> Pourquoi lancer un pull et pas un fetch qui conditionne les actions de mise à
-> jour ? Le pull fait deux choses : Un fetch sur ```origin``` et un merge. On
-> peut donc éviter un test inutil dans le script via cette simple commande. Et
-> si on veut éviter tout risque de discordance entre votre serveur et le depôt
-> GIT, on peut forcer l'écrasement des fichiers serveur via un ```pull -f```. Là
-> encore, c'est à vous de voir... Personnellement, j'évite.
+- DEPL_JETON : Le dossier contenant le jeton. Facultatif si on ne veut pas
+  coupler le traitement avec un Hook. Dans ce dernier cas, chaque lancement du
+  script fait une synchronisation.
+
+- DEPL_CHOWN : L'utilisateur et le group utilisé par le service web. Si le
+  script avec le même compte que celui du service web, il faut laisser vide.
+
+- DEPL_EMAIL : Destinataire de l'e-mail à chaque déploiement. Si on ne veut pas
+  d'e-mail, laisser vide.
+
+- DEPL_FROM : Emetteur de l'e-mail. Laisser vide pour réutiliser la même adresse
+  que le destinataire.
+
+- DEPL_SUBJECT : En général, le nom du site. Il sera ensuite suivit par [OK] ou
+  [ERREUR] en fonction du déploiement.
 
 
-**Allez, maintenant le script !**
+Et voici le script. Veiller à ce qu'il dispose des droits d'execution (chmode) :
 
 ```bash
 #!/usr/bin/env bash
@@ -309,7 +273,8 @@ fi
 
 ```
 
-Ce qui nous sort :
+A titre d'exemple, la configuration actuelle du script affiche le résultat
+suivant (ou similaire selon votre situation) losqu'il est lancé :
 
 ```
 Paramètres de déploiement :
@@ -340,5 +305,45 @@ Attention : E-mail non envoyé
 Fin du traitement.
 ```
 
-Cool !
 
+
+
+Définissez les accès
+--------------------
+
+### Générez vos clés SSH
+
+Utile uniquement si vous n'avez pas déjà un jeu de clé publique/privée. Ici, on
+peut se permettre d'avoir une clé privée sans passphrase (non cryptée).
+
+```
+ssh-keygen -t rsa -b 2048
+```
+
+Si vous avez déjà une clé privée et souhaitez l'extraire de façon non cryptée,
+lancez la commande suivante (dans le cas d'une clé RSA) :
+
+```
+openssl rsa -in id_rsa -out id_rsa.pem
+```
+
+Si vous souhaitez utiliser une clé privée cryptée, la meilleur méthode et la
+plus sécurisée et de lancer un ssh-agent et d'y ajouter la clé... Manuellement.
+Si vous le faite de façon automatisée sur le serveur qui contient la clé privée,
+les avantages de lé clé cryptée sont perdus.
+
+
+### Configurez le client SSH
+
+En règle générale, on utilise les accès SSH. Il faut donc parametrer le client
+SSH pour associer sa clé à son depôt GitHub. Attention à bien faire la
+configuration pour le compte qui va lancer la commande ```git pull``` (vérifiez
+bien votre script).
+
+
+### Déclarez la clé publique sur GitHub / BitBucket
+
+Depuis votre interface de gestion, se placer sur le dépôt git cible et afficher
+la liste des collaborateurs. Y ajouter la clé et le tour est joué.
+
+Voir pour ensuite : http://guides.beanstalkapp.com/deployments/deploy-with-capistrano.html

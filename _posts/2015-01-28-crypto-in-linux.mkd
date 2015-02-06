@@ -577,6 +577,14 @@ aAs=
 -----END ENCRYPTED PRIVATE KEY-----
 ```
 
+**Nota :**  
+Pour extraire une clé privée en claire et l'enregistré de façon non sécurisé,
+utiliser la commande suivante :
+
+```
+openssl rsa -in id_rsa -out id_rsa.pem
+```
+
 Beaucoup sont habitués à l'ancienne syntaxe mais elle avait l'inconvénient
 d'avoir un jeu d'option trop spécifique entre les différents algorithmes de clé.
 Cependant, OpenSSL la supporte toujours très bien :
