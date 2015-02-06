@@ -29,10 +29,10 @@ de tests, etc...).
 
 
 A moins d'utiliser un framework pour languages dynamique coté serveur (Symfony,
-CakePHP, Rails, Sinatra, Voltrb, Django, Flask, voir nodeJS...), vous aurez probablement
-un dossier cible comportant la version finalisée. C'est à dire celle ou vos
-scripts JS seront compilés / minifiés, vos fichier SCSS traités, les sprites
-écrits, les éléments statics générés, etc...
+CakePHP, Rails, Sinatra, Voltrb, Django, Flask, voir nodeJS...), vous aurez
+probablement un dossier cible comportant la version finalisée. C'est à dire
+celle ou vos scripts JS seront compilés / minifiés, vos fichier SCSS traités,
+les sprites écrits, les éléments statics générés, etc...
 
 Si vous n'avez pas de dossier cible, vous pourrez ignorer l'étape concernant les
 sous-modules GIT. En revanche, veillez à disposer des deux branches (master et
@@ -89,6 +89,7 @@ les avantages de lé clé cryptée sont perdus.
 
 
 ### Configurez le client SSH
+
 En règle générale, on utilise les accès SSH. Il faut donc parametrer le client
 SSH pour associer sa clé à son depôt GitHub. Attention à bien faire la
 configuration pour le compte qui va lancer la commande ```git pull``` (vérifiez
@@ -148,17 +149,19 @@ d'exploitation.
 **Allez, maintenant le script !**
 
 ```bash
+
 #!/usr/bin/env bash
 clear
 
 # Parametrages (Ne pas ajouter d'espaces)
+# Les 3 premiers sont des chemuns absolus (path entier)
 export DEPL_SITE_GIT="/home/ubuntu/tests"
 export DEPL_SITE_WEB="/home/ubuntu/tests/www"
+export DEPL_JETON="/home/ubuntu/tests/jeton.txt"         # (vide si off)
+export DEPL_CHOWN=""                  # utilisateur:groupe (vide si off)
+export DEPL_EMAIL="ludovic@moi.com"   # utilisateur@serveur.com (vide si off)
+export DEPL_FROM=""                   # vide si identique ci-dessus
 export DEPL_SUBJECT="mon site web"
-export DEPL_JETON=""
-export DEPL_CHOWN=""
-export DEPL_EMAIL="ludovic@moi.com"
-export DEPL_FROM=""
 
 # Variables d'amorce
 export DEPL_GIT_REPOSITORY=""
@@ -260,6 +263,13 @@ then
 
   [ $DEPL_PASS == 0 ] && DEPL_FLAG="[ERROR]"
   [ ! -z "$DEPL_MSG" ] && echo "$DEPL_MSG"
+fi
+
+# Suppression du jeton
+if [ $DEPL_PASS == 1 ] && [ ! -z $DEPL_JETON ]
+then
+  echo "Suppression du jeton..."
+  rm $DEPL_JETON
 fi
 
 # E-Mail
