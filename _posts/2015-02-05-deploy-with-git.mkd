@@ -155,9 +155,9 @@ clear
 # Paramétrages (Ne pas ajouter d'espaces)
 # Les 3 premiers sont des chemuns absolus (path entier)
 # Et oui, j'utilise export sans réfléchir par habitude :)
-export DEPL_SITE_GIT="/home/ubuntu/tests"
-export DEPL_SITE_WEB="/home/ubuntu/tests/www"
-export DEPL_JETON="/home/ubuntu/tests/jeton.txt"         # (vide si off)
+export DEPL_SITE_GIT="/home/exploit/git/mon_site_web"
+export DEPL_SITE_WEB="/data/www/mon_site_web"
+export DEPL_JETON="/home/exploit/git/mon_site_web"       # (vide si off)
 export DEPL_CHOWN=""                  # utilisateur:groupe (vide si off)
 export DEPL_EMAIL="ludovic@moi.com"   # utilisateur@serveur.com (vide si off)
 export DEPL_FROM=""                   # vide si identique ci-dessus
@@ -313,8 +313,8 @@ Ce qui nous sort :
 
 ```
 Paramètres de déploiement :
-Dossier git : /home/ubuntu/tests
-Site web : /home/ubuntu/tests/www
+Dossier git : /home/exploit/git/mon_site_web
+Site web : /data/www/mon_site_web
 Jeton 0
 Envoie d'e-mail à : ludovic@moi.com
 Attention : Sendmail n'est pas installé. Aucun envoi d'e-mail
