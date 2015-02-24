@@ -552,3 +552,32 @@ a.pagination-item:hover {
 .layout-reverse.sidebar-overlay #sidebar-checkbox:checked ~ .sidebar {
   box-shadow: -.25rem 0 .5rem rgba(0,0,0,.1);
 }
+
+/* Personalize */
+.social-media-list {
+    list-style: none;
+    margin-left: 0;
+    padding: 0 ;
+}
+.social-media-list .sidebar-nav-item {
+  border: none;
+}
+
+.social-media-list .username {
+  margin-left: 20px;
+}
+
+/**
+ * Icons
+ */
+.icon > svg {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+.icon > svg path {
+  fill: $grey-color;
+}
+

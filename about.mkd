@@ -1,0 +1,26 @@
+---
+layout: page
+title: About
+permalink: /about/
+---
+
+Hello you,
+
+I'm Ludovic, a french programmer living near Paris, with a human spirit behind
+screens. I'm here to share experiences, my humbly discoveries, passions, things
+that make me scream and other I love, open to world and open to you. Be free to
+engage conversation on Twitter :)
+
+In everyday life, I develop web services on technologies like Ruby, Node or
+GoLang. Each programming language reflect a way of thinking, it's really
+interesting to play with. So, I also studying other languages like Python,
+Elixir, and keep stick with PHP for fun (and a long hope now).
+
+And because technologie is nothing without dreams, I'm also sensitive to social
+events, regularly puts me in question, invest in history and evolution of
+ourselves.
+
+For the end, I love architectural constructions, general design and... After an
+overlook of my movie collection, some clues puts me in the category of SF fans.
+Damn !
+
