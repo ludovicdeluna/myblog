@@ -110,7 +110,7 @@ Le script doit décrire les éléments suivants :
   [ERREUR] en fonction du déploiement.
 
 
-Et voici le script. Veiller à ce qu'il dispose des droits d'execution (chmode) :
+Et voici le script. Veiller à ce qu'il dispose des droits d'execution (chmod) :
 
 ```bash
 #!/usr/bin/env bash
