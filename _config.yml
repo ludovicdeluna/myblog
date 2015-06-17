@@ -5,7 +5,7 @@ description: > # this means to ignore newlines until "baseurl:"
   Yet again a blog about technologies... Hum, or exactly what I see in them,
   experimentations, love/hate and so one, with a LoL spirit of course.
 baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://10.0.0.10/" # the base hostname & protocol for your site
+url: "http://localhost:4000/" # the base hostname & protocol for your site
 twitter_username: ludovic_deluna
 github_username:  ludovicdeluna
 version: "1.0"
@@ -13,8 +13,8 @@ github:
   repo : "https://github.com/ludovicdeluna/myblog"
 
 # Server setting
-port: 3000
-host: 10.0.0.10
+port: 4000
+host: localhost
 encoding: utf-8
 
 # Pagination
